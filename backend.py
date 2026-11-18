@@ -20,14 +20,15 @@ def get_weather_data(place, days):
     lon = location.longitude
 
     weather_url = (f"https://data.api.xweather.com/forecasts/{lat}%2C{lon}?"
-                   f"from=now&to={days}&client_id={CLIENT_ID}&client_secret={CLIENT_SECRET}")
+                   f"from=now&to={days}&plimit={days}&"
+                   f"client_id={CLIENT_ID}&client_secret={CLIENT_SECRET}")
     response = requests.get(weather_url)
     data = response.json()
 
     arr = data["response"][0]["periods"]
 
-    dates = [d["dateTimeISO"] for d in arr][:days]
-    temperatures = [t["avgTempC"] for t in arr][:days]
-    weathers = [(w["dateTimeISO"], w["weather"]) for w in arr][:days]
+    dates = [d["dateTimeISO"] for d in arr]
+    temperatures = [t["avgTempC"] for t in arr]
+    weathers = [(w["dateTimeISO"], w["weather"]) for w in arr]
 
     return dates, temperatures, weathers
