@@ -29,37 +29,39 @@ report_kind = st.selectbox(
     key="option")
 
 if place and report_kind:
-    st.subheader(
-        body=f"{report_kind.title()} for the next {num_days} "
-             f"day{'' if num_days == 1 else 's'} in {place.title()}",
-        text_alignment="center")
+    try:
+        st.subheader(
+            body=f"{report_kind.title()} for the next {num_days} "
+                 f"day{'' if num_days == 1 else 's'} in {place.title()}",
+            text_alignment="center")
 
-    data = get_weather_data(place, num_days)
+        data = get_weather_data(place, num_days)
 
-    dates, temperatures, weathers = data
+        dates, temperatures, weathers = data
 
-    match report_kind:
-        case "Temperature":
-            figure = px.scatter(
-                x=dates,
-                y=temperatures,
-                labels={"x": "Date", "y": "Temperature °C"})
+        match report_kind:
+            case "Temperature":
+                figure = px.scatter(
+                    x=dates,
+                    y=temperatures,
+                    labels={"x": "Date", "y": "Temperature °C"})
 
-            st.plotly_chart(figure)
-        case "Sky":
-            cols = st.columns(len(weathers))
-            for col, weather in zip(cols, weathers):
-                w = ""
-                if "Sunny" in weather[1]:
-                    w = "clear"
-                elif "Cloudy" in weather[1]:
-                    w = "cloud"
-                elif "Showers" in weather[1]:
-                    w = "rain"
-                elif "Snow" in weather[1]:
-                    w = "snow"
+                st.plotly_chart(figure)
+            case "Sky":
+                cols = st.columns(len(weathers))
+                for col, weather in zip(cols, weathers):
+                    w = ""
+                    if "Sunny" in weather[1]:
+                        w = "clear"
+                    elif "Cloudy" in weather[1]:
+                        w = "cloud"
+                    elif "Showers" in weather[1]:
+                        w = "rain"
+                    elif "Snow" in weather[1]:
+                        w = "snow"
 
-                d = datetime.datetime.fromisoformat(weather[0])
-                with col:
-                    st.image(f"images/{w}.png", width=100, caption=d.strftime('%d-%m-%Y'))
-
+                    d = datetime.datetime.fromisoformat(weather[0])
+                    with col:
+                        st.image(f"images/{w}.png", width=100, caption=d.strftime('%d-%m-%Y'))
+    except AttributeError:
+        st.warning("That place not exist!")
