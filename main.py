@@ -1,7 +1,7 @@
 import streamlit as st
 import plotly.express as px
 from backend import get_weather_data
-import pandas as pd
+import datetime
 
 # st.set_page_config(layout="wide")
 
@@ -36,16 +36,30 @@ if place and report_kind:
 
     data = get_weather_data(place, num_days)
 
-    d, t, w = data
+    dates, temperatures, weathers = data
 
-    if report_kind == "Temperature":
-        figure = px.scatter(
-            x=d,
-            y=t,
-            labels={"x": "Date", "y": "Temperature °C"})
+    match report_kind:
+        case "Temperature":
+            figure = px.scatter(
+                x=dates,
+                y=temperatures,
+                labels={"x": "Date", "y": "Temperature °C"})
 
-        st.plotly_chart(figure)
-    elif report_kind == "Sky":
-        for i in w:
-            st.write(f"{i[0]} => {i[1]}")
+            st.plotly_chart(figure)
+        case "Sky":
+            cols = st.columns(len(weathers))
+            for col, weather in zip(cols, weathers):
+                w = ""
+                if "Sunny" in weather[1]:
+                    w = "clear"
+                elif "Cloudy" in weather[1]:
+                    w = "cloud"
+                elif "Showers" in weather[1]:
+                    w = "rain"
+                elif "Snow" in weather[1]:
+                    w = "snow"
+
+                d = datetime.datetime.fromisoformat(weather[0])
+                with col:
+                    st.image(f"images/{w}.png", width=100, caption=d.strftime('%d-%m-%Y'))
 
