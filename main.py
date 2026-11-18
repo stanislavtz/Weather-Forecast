@@ -1,14 +1,7 @@
 import streamlit as st
 import plotly.express as px
+from backend import get_weather_data
 import pandas as pd
-
-
-def get_data(num_days):
-    dates = ["2026-11-19", "2026-11-20", "2026-11-21"]
-    temperatures = [10, 11, 12]
-    temperatures = [num_days * t for t in temperatures]
-    return dates, temperatures
-
 
 # st.set_page_config(layout="wide")
 
@@ -28,25 +21,31 @@ num_days = st.slider(
     key="num_days",
     help="Select the number of days to forecast")
 
-option = st.selectbox(
+report_kind = st.selectbox(
     label="Select data to view",
     options=("", "Temperature", "Sky"),
     index=0,
     required=True,
     key="option")
 
-if place and option:
+if place and report_kind:
     st.subheader(
-        body=f"{option.title()} for the next {num_days} "
+        body=f"{report_kind.title()} for the next {num_days} "
              f"day{'' if num_days == 1 else 's'} in {place.title()}",
         text_alignment="center")
 
-    d, t = get_data(num_days)
+    data = get_weather_data(place, num_days)
 
-    figure = px.line(
-        x=d,
-        y=t,
-        labels={"x": "Date", "y": "Temperature °C"})
+    d, t, w = data
 
-    st.plotly_chart(figure)
+    if report_kind == "Temperature":
+        figure = px.scatter(
+            x=d,
+            y=t,
+            labels={"x": "Date", "y": "Temperature °C"})
+
+        st.plotly_chart(figure)
+    elif report_kind == "Sky":
+        for i in w:
+            st.write(f"{i[0]} => {i[1]}")
 
